@@ -5,6 +5,7 @@ https://day12-leduyanh.onrender.com
 
 ## Platform
 Render
+![Project deployment](project_deloy.png "Render Deployment")
 
 ## Test Commands
 

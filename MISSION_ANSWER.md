@@ -53,16 +53,49 @@ Image size là 1.66GB
 - Difference: 86.12%
 
 ### Exercise 2.4: Docker compose stack
-
+[ Public Internet / Host ]
+                             │
+                             ▼ (Ports 80 / 443)
+┌──────────────────────────────────────────────────────────┐
+│ Docker Host                                              │
+│                                                          │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ NGINX                                              │  │
+│  │ (Reverse Proxy / Load Balancer)                    │  │
+│  └─────────────────────────┬──────────────────────────┘  │
+│                            │                             │
+│ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄│┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄ ┄  │
+│   [ Internal Bridge Network: `internal` ]                │
+│                            │                             │
+│                            ▼                             │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ AGENT (FastAPI AI Agent)                           │  │
+│  │ • Port: 8000 (Chỉ mở trong mạng nội bộ)            │  │
+│  │ • Config: .env.local                               │  │
+│  └──────────────┬──────────────────────┬──────────────┘  │
+│                 │                      │                 │
+│                 ▼                      ▼                 │
+│  ┌──────────────────────┐   ┌──────────────────────┐     │
+│  │ REDIS                │   │ QDRANT               │     │
+│  │ (Session / Rate Lim) │   │ (Vector Database)    │     │
+│  └─────────┬────────────┘   └──────────┬───────────┘     │
+│            │                           │                 │
+├────────────┼───────────────────────────┼─────────────────┤
+│ Volumes    ▼                           ▼                 │
+│      [( redis_data )]            [( qdrant_data )]       │
+└──────────────────────────────────────────────────────────┘
 
 
 ## Part 3: Cloud Deployment
 
 ### Exercise 3.1: Railway deployment
 - URL: https://lab121-production.up.railway.app/
-- Screenshot: ./railway_screenshot.png
+![screenshot_railway](railway_screenshot.png "Railway Deploy")
 
 ### Exercise 3.2: Render deployment
+So sánh render.yaml với railway.toml:
+render.yaml: Quản lý cả cụm hạ tầng (Multi-service). Dùng để khai báo và dựng toàn bộ hệ thống (Web + Worker + Redis) cùng lúc.
+railway.toml: Quản lý lúc khởi chạy cho 1 ứng dụng duy nhất (Single-service). Chỉ tập trung vào lệnh start, port và cơ chế restart.
 
 
 ## Part 4: API Security
