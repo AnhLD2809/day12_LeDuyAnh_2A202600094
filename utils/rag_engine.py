@@ -4,6 +4,10 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from app.config import settings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Thư mục lưu trữ index của FAISS để không phải tạo lại mỗi lần chạy
 VECTOR_STORE_PATH = "faiss_index"
@@ -17,7 +21,7 @@ def init_vector_store():
     
     # Sử dụng model embedding rẻ và xịn nhất của OpenAI hiện tại
     embeddings = OpenAIEmbeddings(
-        api_key=settings.OPENAI_API_KEY, 
+        api_key=os.getenv("OPENAI_API_KEY"), 
         model="text-embedding-3-small"
     )
     
