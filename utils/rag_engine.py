@@ -17,7 +17,7 @@ def init_vector_store():
     
     # Sử dụng model embedding rẻ và xịn nhất của OpenAI hiện tại
     embeddings = OpenAIEmbeddings(
-        api_key=settings.LLM_API_KEY, 
+        api_key=settings.OPENAI_API_KEY, 
         model="text-embedding-3-small"
     )
     
