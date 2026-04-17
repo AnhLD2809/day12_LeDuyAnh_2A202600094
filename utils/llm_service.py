@@ -1,9 +1,13 @@
 from openai import AsyncOpenAI, OpenAIError
 from typing import List, Dict, Tuple
 from app.config import settings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Khởi tạo client OpenAI
-client = AsyncOpenAI(api_key=settings.LLM_API_KEY)
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 async def call_llm(history: List[Dict[str, str]], question: str, context: str = "") -> Tuple[str, float]:
     """
