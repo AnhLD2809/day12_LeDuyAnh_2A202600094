@@ -29,6 +29,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="RAG LLM API", version="1.0.0", lifespan=lifespan)
 redis_client = redis.from_url(settings.redis_url, decode_responses=True)
 
+class AskRequest(BaseModel):
+    user_id: str
+    question: str
+
 @app.get("/health", tags=["System"])
 async def health():
     """Kiểm tra xem Container có đang sống hay không (Liveness)."""
@@ -51,9 +55,11 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: str
 
+# Gắn decorator trực tiếp vào hàm chứa logic thật
 @app.post("/ask", response_model=AskResponse)
 async def ask(
     request: AskRequest,
+    # Auth sẽ chặn ở đây, nếu đúng key mới lấy được user_id đi tiếp
     user_id: str = Depends(verify_api_key),
     _rate_limit: None = Depends(check_rate_limit),
     _budget: None = Depends(check_budget)
@@ -79,6 +85,7 @@ async def ask(
         history = history[-10:] 
         await redis_client.setex(redis_key, 3600, json.dumps(history))
 
+        # Trả về đúng format Pydantic model
         return AskResponse(answer=llm_response)
 
     except Exception as e:
