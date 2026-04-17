@@ -1,0 +1,53 @@
+# ============================================================
+# Production Dockerfile — Multi-stage, < 500 MB, non-root
+# ============================================================
+
+# Stage 1: Builder
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+# Cài đặt vào ~/.local
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+
+# Stage 2: Runtime
+FROM python:3.11-slim AS runtime
+
+# [ĐÃ SỬA] Tạo non-root user và cấp cho nó một thư mục home chuẩn mực
+RUN groupadd -r agent && useradd -r -g agent -m -d /home/agent agent
+
+WORKDIR /app
+
+# Copy packages từ builder sang thư mục home chuẩn của user agent
+COPY --from=builder /root/.local /home/agent/.local
+
+# [ĐÃ SỬA] Copy toàn bộ application và thư mục data cho RAG
+COPY app/ ./app/
+COPY utils/ ./utils/
+COPY data/ ./data/
+
+# Cấp quyền sở hữu thư mục làm việc cho user agent (để có thể ghi file faiss_index)
+RUN chown -R agent:agent /app
+
+USER agent
+
+ENV PATH=/home/agent/.local/bin:$PATH
+ENV PYTHONPATH=/app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+
+# Health check (dùng curl hoặc urllib đều ok)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD python -c \
+    "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" \
+    || exit 1
+
+# [ĐÃ SỬA] Hỗ trợ biến $PORT của Railway, bỏ bớt worker nếu chạy RAM nhỏ để tránh Out of Memory do FAISS
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"]

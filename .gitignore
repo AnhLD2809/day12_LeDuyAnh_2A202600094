@@ -1,0 +1,54 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+ENV/
+
+# --- Environment & Secrets (RẤT QUAN TRỌNG) ---
+.env
+.venv
+env.bak
+*.secrets
+
+# --- RAG & Vector Database ---
+# Không nên push index lên vì nó sẽ được tạo lại khi deploy
+faiss_index/
+*.pickle
+*.index
+
+# --- Docker ---
+.dockerignore
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- OS ---
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+logs/

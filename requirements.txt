@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+redis
+pydantic
+pydantic-settings
+openai
+langchain
+langchain-openai
+langchain-community
+faiss-cpu
+tiktoken
+python-dotenv
